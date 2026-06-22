@@ -1,0 +1,237 @@
+require_relative '../../../lib/go_fish/game'
+
+describe Game do
+  let(:player_ids) { [0, 1] }
+  let(:game) { described_class.new(player_ids) }
+  let(:players) { game.players }
+  let(:deck) { game.deck }
+
+  describe '#start' do
+    it 'shuffles cards' do
+      unshuffled_hand = deck.cards[0..6]
+      game.start
+      shuffled_hand = players.first.hand
+      expect(shuffled_hand).not_to eq unshuffled_hand
+    end
+
+    it "each player's is dealt seven cards" do
+      game.start
+      players.each { |player| expect(player.hand_size).to be 7 }
+    end
+  end
+
+  describe '#play_turn' do
+    let(:player_card) { Card.new('3', 'Spades') }
+    let(:opponent_card) { Card.new('4', 'Clubs') }
+    let(:requested_card) { Card.new('3', 'Clubs') }
+    let(:turn_result) { game.play_turn(0, '3', 1) }
+
+    before do
+      game.start
+      players.first.hand = [player_card]
+      players.last.hand = [requested_card, opponent_card]
+    end
+
+    it 'returns a TurnResult object' do
+      expect(turn_result).to be_a TurnResult
+    end
+
+    context 'opponent has card' do
+
+      it 'removes card from opponent and gives to player' do
+        turn_result
+        expect(players.first.hand).to include requested_card
+        expect(players.last.hand).to eq [opponent_card]
+      end
+
+      it 'turn result is populated with correct data' do
+        expect(turn_result.go_fish).to be false
+        expect(turn_result.cards).to include requested_card
+      end
+    end
+
+    context 'opponent does not have card' do
+
+      context 'when deck is empty' do
+        let(:turn_result) { game.play_turn(0, '3', 1) }
+        before do
+          deck.cards = []
+          players.first.hand = []
+          players.last.hand = [Card.new('2', 'Spades')]
+        end
+
+        it 'it player takes no cards' do
+          turn_result
+          expect(players.first.hand).to be_empty
+        end
+
+        it 'TurnResult is populated with oppropriate data' do
+          expect(turn_result.deck_empty).to be true
+        end
+      end
+
+      context 'when deck is not empty' do
+        before do
+          players.last.hand = [opponent_card]
+          deck.cards = [requested_card]
+        end
+
+        let(:turn_result) { game.play_turn(0, '3', 1) }
+
+        it 'removes card from deck and gives to player' do
+          turn_result
+          expect(players.first.hand).to include requested_card
+          expect(deck.cards).not_to include requested_card
+        end
+
+        it 'turn result is populated with appropriate data' do
+          expect(turn_result.go_fish).to be true
+          expect(turn_result.cards).to include requested_card
+        end
+
+        context 'deck has card' do
+          it 'turn result is populated with the appropriate data' do
+            expect(turn_result.go_again).to be true
+          end
+        end
+
+        context 'deck does not have card' do
+          let(:other_card) { Card.new('10', 'Spades') }
+
+          before do
+            players.last.hand = [opponent_card]
+            deck.cards = [other_card]
+          end
+
+          it 'turn result is populated with the appropriate data' do
+            expect(turn_result.go_again).to be false
+          end
+        end
+      end
+    end
+  end
+
+  describe '#winner' do
+
+    context 'when one or more player has cards' do
+      before { players.first.hand = [Card.new('A', 'Spades')] }
+
+      it 'winner returns nil' do
+        expect(game.winner).to be_nil
+      end
+    end
+
+    context 'when no player has cards' do
+      let(:winner_id) { 0 }
+
+      context 'when one player has more books than the others' do
+        before do
+          players.first.books.push Book.new('3'), Book.new('4')
+          players.last.books.push Book.new('5')
+        end
+
+        it 'winner returns that player id' do
+          expect(game.winner).to be winner_id
+        end
+      end
+
+
+      context 'when the two players with the most books have the same amount' do
+        before do
+          players.first.books.push Book.new('K')
+          players.last.books.push Book.new('Q')
+        end
+
+        it 'winner returns the id of the player with the highest rank' do
+          expect(game.winner).to be winner_id
+        end
+      end
+    end
+  end
+
+  describe '#opponent_validation' do
+
+    context 'when input is valid' do
+      let(:valid) { { valid: true } }
+
+      it 'returns valid' do
+        expect(game.opponent_validation(0, '2')).to eq valid
+      end
+    end
+
+    context 'when input is invalid' do
+      let(:invalid_format) { { invalid: :format } }
+      let(:invalid_opponent) { { invalid: :opponent_id } }
+
+      context 'when input is not an integer' do
+        it 'returns invalid format' do
+          expect(game.opponent_validation(0, 'invalid')).to eq invalid_format
+        end
+      end
+
+      context 'when input is active_player_id' do
+        it 'returns invalid opponent' do
+          expect(game.opponent_validation(0, '0')).to eq invalid_opponent
+        end
+      end
+
+      context 'when input is not a valid player id' do
+        it 'returns invalid opponent' do
+          expect(game.opponent_validation(0, '3')).to eq invalid_opponent
+        end
+      end
+    end
+  end
+
+  describe '#rank_validation' do
+
+    context 'when input is valid' do
+      let(:valid) { { valid: true } }
+      before do
+        players.first.hand = [Card.new('3', 'Spades')]
+      end
+
+      it 'returns invalid format' do
+        expect(game.rank_validation(0, '3')).to eq valid
+      end
+
+    end
+
+    context 'when input is invalid' do
+      let(:invalid_format) { { invalid: :format } }
+      let(:invalid_rank) { { invalid: :rank } }
+
+      context 'when input is not a valid format' do
+        it 'returns invalid format' do
+          expect(game.rank_validation(0, 'invalid')).to eq invalid_format
+        end
+      end
+
+      context 'when user does not have a card of a given rank' do
+        it 'returns invalid rank' do
+          expect(game.rank_validation(0, '3')).to eq invalid_rank
+        end
+      end
+    end
+  end
+
+  describe '#active_player_hand_empty' do
+    let(:id) { 0 }
+
+    context "when active player's hand is empty" do
+      it 'returns true' do
+        expect(game.active_player_hand_empty?(id)).to be true
+      end
+    end
+
+    context "when active player's hand is not empty" do
+      before do
+        players.first.hand = [Card.new('K', 'Spades')]
+      end
+
+      it 'returns false' do
+        expect(game.active_player_hand_empty?(id)).to be false
+      end
+    end
+  end
+end
