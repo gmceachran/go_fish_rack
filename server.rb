@@ -5,8 +5,9 @@ require_relative 'lib/go_fish/player'
 
 class Server < Sinatra::Base
   enable :sessions
+
   def self.game
-    @@game ||=Game.new
+    @@game ||= Game.new
   end
 
   def self.api_keys
@@ -22,16 +23,32 @@ class Server < Sinatra::Base
     session[:api_key] = api_key
     self.class.api_keys[api_key] = params[:name]
 
+    game = self.class.game
+    player_name = find_name
+    game.add_player(player_name)
+
     redirect '/game'
   end
 
   get '/game' do
     check_keys
-    slim :game, locals: { names: self.class.api_keys.map { |key, name| name } }
+    redirect '/waiting' unless enough_players?
+
+    slim :game, locals: {
+      names: self.class.api_keys.map { |key, name| name },
+      game: self.class.game
+    }
+  end
+
+  get '/waiting' do
+    redirect '/game' if enough_players?
+
+    slim :waiting
   end
 
   def self.reset!
     @@game = nil
+    @@api_keys = nil
   end
 
   private
@@ -43,4 +60,7 @@ class Server < Sinatra::Base
     api_keys.each { |api_key, name| return if session[:api_key] == api_key }
     redirect '/'
   end
+
+  def find_name = self.class.api_keys[session[:api_key]]
+  def enough_players? = self.class.api_keys.length >= 2
 end

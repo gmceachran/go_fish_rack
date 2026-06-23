@@ -8,10 +8,10 @@
       .gf-section__content.gf-section__content--players
         .players-content
           .players-content__header
-          | Players
+            | Players
           .players-content__accordions
-            - names.each do |name|
-              == slim :accordion, locals: { name: name }
+            - game.players.each do |player|
+              == slim :accordion, locals: { player: }
   section.game-board__feed
     .gf-section
       header.gf-section__header.gf-section__header--feed

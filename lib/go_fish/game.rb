@@ -6,10 +6,14 @@ class Game
   attr_reader :players, :deck, :turn_results
   STARTING_HAND = 7
 
-  def initialize(player_ids)
-    @players = player_ids.map { |id| Player.new(id) }
+  def initialize
+    @players = []
     @deck = Deck.new
     @turn_results = []
+  end
+
+  def add_player(player_name)
+    players << Player.new(player_name)
   end
 
   def turn_result = turn_results.last
@@ -34,7 +38,7 @@ class Game
       best_book_value = player.books.map { |book| book.value }.max || -1
       [player.books.length, best_book_value]
     end
-    winner.id
+    winner.name
   end
 
   # def opponent_validation(active_player_name, input)

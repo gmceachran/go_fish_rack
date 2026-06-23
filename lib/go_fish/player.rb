@@ -1,7 +1,7 @@
 require_relative 'book'
 
 class Player
-  attr_reader :id
+  attr_reader :name
   attr_accessor :hand, :books
 
   def initialize(name)

@@ -2,9 +2,13 @@ require_relative '../../../lib/go_fish/game'
 
 describe Game do
   let(:player_names) { ["John", "Farquad"] }
-  let(:game) { described_class.new(player_names) }
+  let(:game) { described_class.new }
   let(:players) { game.players }
   let(:deck) { game.deck }
+
+  before do
+    player_names.each { |name| game.add_player name }
+  end
 
   describe '#start' do
     it 'shuffles cards' do
@@ -130,7 +134,7 @@ describe Game do
           players.last.books.push Book.new('5')
         end
 
-        it 'winner returns that player id' do
+        it 'winner returns that player name' do
           expect(game.winner).to eq winner_name
         end
       end
