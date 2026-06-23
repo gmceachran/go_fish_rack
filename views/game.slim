@@ -1,2 +1,22 @@
 p Players
-p John
+-names.each do |name|
+  =name
+
+details.accordion
+  summary.accordion__header
+    i.ph.ph-caret-right.accordion__marker
+    span.header__content
+      | name
+      .flex.gap-lg.hand-info
+        p.hand-info__text
+          | Cards
+          strong 5
+        p.hand-info__text
+          | Books
+          strong 2
+  .accordion__tray
+    .card-tray
+      img.playing-card.playing-card--medium.playing-card--back src="/images/cards_light/card_back.svg" alt="Face down card"
+    .card-tray
+      img.playing-card.playing-card--small src="/images/cards_light/4_spades.svg" alt="Four of Spades"
+

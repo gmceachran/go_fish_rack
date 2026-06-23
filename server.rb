@@ -9,15 +9,41 @@ class Server < Sinatra::Base
     @@game ||=Game.new
   end
 
+  def self.api_keys
+    @@api_keys ||= {}
+  end
+
   get '/' do
     slim :login
   end
 
-  post '/submit' do
-    slim :game
+  post '/join' do
+    api_key = Base64.urlsafe_encode64(params["name"])
+    session[:api_key] = api_key
+    self.class.api_keys[api_key] = params[:name]
+
+    redirect '/game'
+  end
+
+  get '/game' do
+    check_keys
+    slim :game, locals: { names: self.class.api_keys.map { |key, name| name } }
   end
 
   def self.reset!
     @@game = nil
+  end
+
+  private
+
+  def check_keys
+    redirect '/' if self.class.api_keys.empty?
+    redirect '/' unless session.key?(:api_key)
+
+    self.class.api_keys.each do |api_key, name|
+      return if session[:api_key] == api_key
+    end
+
+    redirect '/'
   end
 end
