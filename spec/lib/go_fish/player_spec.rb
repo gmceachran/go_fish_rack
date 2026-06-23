@@ -2,8 +2,8 @@ require_relative '../../../lib/go_fish/player'
 require_relative '../../../lib/go_fish/card'
 
 describe Player do
-  let(:id) { 0 }
-  let(:player) { described_class.new(id) }
+  let(:name) { "John" }
+  let(:player) { described_class.new(name) }
 
   describe '#hand_size' do
     before { player.hand << Card.new('A', 'Spades') }

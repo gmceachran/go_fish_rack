@@ -4,8 +4,8 @@ class Player
   attr_reader :id
   attr_accessor :hand, :books
 
-  def initialize(id)
-    @id = id
+  def initialize(name)
+    @name = name
     @hand = []
     @books = []
   end

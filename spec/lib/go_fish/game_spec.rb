@@ -1,6 +1,6 @@
 require_relative '../../../lib/go_fish/game'
 
-fdescribe Game do
+describe Game do
   let(:player_names) { ["John", "Farquad"] }
   let(:game) { described_class.new(player_names) }
   let(:players) { game.players }
