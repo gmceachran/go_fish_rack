@@ -37,13 +37,10 @@ class Server < Sinatra::Base
   private
 
   def check_keys
-    redirect '/' if self.class.api_keys.empty?
+    api_keys = self.class.api_keys
+    redirect '/' if api_keys.empty?
     redirect '/' unless session.key?(:api_key)
-
-    self.class.api_keys.each do |api_key, name|
-      return if session[:api_key] == api_key
-    end
-
+    api_keys.each { |api_key, name| return if session[:api_key] == api_key }
     redirect '/'
   end
 end
