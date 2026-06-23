@@ -37,25 +37,26 @@ class Game
     winner.id
   end
 
-  def opponent_validation(active_player_id, input)
-    return { invalid: :format } unless input.match?(/\A\d+\z/)
+  # def opponent_validation(active_player_name, input)
+  #   return { invalid: :format } unless input.match?(/\A\d+\z/)
 
-    id = input.to_i - 1
-    return { invalid: :opponent_id } if id == active_player_id
-    return { invalid: :opponent_id } unless players.any? { |player| player.id == id }
+  #   id = input.to_i - 1
+  #   return { invalid: :opponent_id } if id == active_player_name
+  #   return { invalid: :opponent_id } unless players.any? { |player| player.id == id }
 
-    { valid: true }
-  end
+  #   { valid: true }
+  # end
 
-  def rank_validation(active_player_id, input)
-    return { invalid: :format } unless Card::RANKS.include?(input)
-    return { invalid: :rank } unless players[active_player_id].cards_of_rank?(input)
+  # def rank_validation(active_player_id, input)
+  #   return { invalid: :format } unless Card::RANKS.include?(input)
+  #   return { invalid: :rank } unless players[active_player_id].cards_of_rank?(input)
 
-    { valid: true }
-  end
+  #   { valid: true }
+  # end
 
-  def active_player_hand_empty?(id)
-    players[id].hand.empty?
+  def active_player_hand_empty?(name)
+    # TODO: Needs to be refactored to find player by name
+    players[name].hand.empty?
   end
 
   private
