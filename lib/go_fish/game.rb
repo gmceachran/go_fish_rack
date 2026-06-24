@@ -4,12 +4,14 @@ require_relative 'deck'
 
 class Game
   attr_reader :players, :deck, :turn_results
+  attr_accessor :started
   STARTING_HAND = 7
 
   def initialize
     @players = []
     @deck = Deck.new
     @turn_results = []
+    @started = false
   end
 
   def add_player(player_name)
@@ -21,6 +23,7 @@ class Game
   def start
     deck.shuffle
     deal(players, STARTING_HAND)
+    self.started = true
   end
 
   def play_turn(player_id, rank, opponent_id)

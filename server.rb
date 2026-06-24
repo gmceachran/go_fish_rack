@@ -34,9 +34,12 @@ class Server < Sinatra::Base
     check_keys
     redirect '/waiting' unless enough_players?
 
+    game = self.class.game
+    game.start unless game.started
+
     slim :game, locals: {
       names: self.class.api_keys.map { |key, name| name },
-      game: self.class.game
+      game: game
     }
   end
 

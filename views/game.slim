@@ -11,7 +11,7 @@
             | Players
           .players-content__accordions
             - game.players.each do |player|
-              == slim :accordion, locals: { player: }
+              == slim :_accordion, locals: { player: }
   section.game-board__feed
     .gf-section
       header.gf-section__header.gf-section__header--feed

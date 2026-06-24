@@ -1,6 +1,8 @@
 require_relative '../server'
 
 RSpec.describe Server do
+  # let!(:session1) { Capybara::Session.new(:rack_test, Server.new) }
+  # let!(:session2) { Capybara::Session.new(:rack_test, Server.new) }
 
   after do
     Server.reset!
@@ -35,11 +37,24 @@ RSpec.describe Server do
   end
 
   context 'when there are enough players to join' do
-    it 'cards are dealt' do
+    let(:starting_hand_length) { 7 }
+
+    before do
       join_game('John')
       join_game('Jane')
+    end
 
+    it 'game page renders' do
       expect(page).to have_css '.accordion'
+    end
+
+    fit 'cards are dealt' do
+      accordion = find_all('.accordion')[0]
+
+      within accordion do
+        playing_cards = find_all('img', visible: :all)
+        expect(playing_cards.length).to be starting_hand_length
+      end
     end
   end
 
