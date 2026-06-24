@@ -4,7 +4,7 @@ require_relative 'deck'
 
 class Game
   attr_reader :players, :deck, :turn_results
-  attr_accessor :started
+  attr_accessor :started, :active_player_index
   STARTING_HAND = 7
 
   def initialize
@@ -12,6 +12,7 @@ class Game
     @deck = Deck.new
     @turn_results = []
     @started = false
+    @active_player_index = 0
   end
 
   def add_player(player_name)
@@ -26,12 +27,25 @@ class Game
     self.started = true
   end
 
-  def play_turn(player_id, rank, opponent_id)
-    player, opponent = players[player_id], players[opponent_id]
+  def play_turn(player_name, rank, opponent_name)
+    player = players.detect { |player| player.name == player_name }
+    opponent = players.detect { |player| player.name == opponent_name }
     opponent_cards_of_rank = opponent.cards_of_rank_given(rank)
 
     handle_take_cards(player, opponent_cards_of_rank, rank)
     turn_result
+  end
+
+  def advance_turn
+    if active_player_index == (players.length - 1)
+      self.active_player_index = 0
+    else
+      self.active_player_index += 1
+    end
+  end
+
+  def current_player
+    players[active_player_index]
   end
 
   def winner
@@ -48,15 +62,15 @@ class Game
   #   return { invalid: :format } unless input.match?(/\A\d+\z/)
 
   #   id = input.to_i - 1
-  #   return { invalid: :opponent_id } if id == active_player_name
-  #   return { invalid: :opponent_id } unless players.any? { |player| player.id == id }
+  #   return { invalid: :opponent_name } if id == active_player_name
+  #   return { invalid: :opponent_name } unless players.any? { |player| player.id == id }
 
   #   { valid: true }
   # end
 
-  # def rank_validation(active_player_id, input)
+  # def rank_validation(active_player_name, input)
   #   return { invalid: :format } unless Card::RANKS.include?(input)
-  #   return { invalid: :rank } unless players[active_player_id].cards_of_rank?(input)
+  #   return { invalid: :rank } unless players[active_player_name].cards_of_rank?(input)
 
   #   { valid: true }
   # end

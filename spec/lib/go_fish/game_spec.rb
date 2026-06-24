@@ -28,7 +28,7 @@ describe Game do
     let(:player_card) { Card.new('3', 'Spades') }
     let(:opponent_card) { Card.new('4', 'Clubs') }
     let(:requested_card) { Card.new('3', 'Clubs') }
-    let(:turn_result) { game.play_turn(0, '3', 1) }
+    let(:turn_result) { game.play_turn('John', '3', 'Farquad') }
 
     before do
       game.start
@@ -57,7 +57,7 @@ describe Game do
     context 'opponent does not have card' do
 
       context 'when deck is empty' do
-        let(:turn_result) { game.play_turn(0, '3', 1) }
+        let(:turn_result) { game.play_turn('John', '3', 'Farquad') }
         before do
           deck.cards = []
           players.first.hand = []
@@ -80,7 +80,7 @@ describe Game do
           deck.cards = [requested_card]
         end
 
-        let(:turn_result) { game.play_turn(0, '3', 1) }
+        let(:turn_result) { game.play_turn('John', '3', 'Farquad') }
 
         it 'removes card from deck and gives to player' do
           turn_result
