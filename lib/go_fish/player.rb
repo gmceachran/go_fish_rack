@@ -50,7 +50,7 @@ class Player
   def data
     {
       name: name,
-      books: books,
+      books: books.map { |book| book.rank },
       book_count: books.length
     }
   end

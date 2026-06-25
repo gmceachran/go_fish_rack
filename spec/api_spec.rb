@@ -9,7 +9,7 @@ describe Server, type: :request do
 
   describe 'POST /join' do
     it 'returns a response matching the join schema' do
-      post '/join', { 'name' => 'Bot' }.to_json,
+      post '/join', { 'name' => 'Bot_Steve' }.to_json,
         { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' }
       expect(last_response).to be_ok
       expect(last_response).to match_json_schema('join')
@@ -19,7 +19,8 @@ describe Server, type: :request do
 
   describe 'GET /game' do
     before do
-      post '/join', { 'name' => 'Bot' }.to_json, { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' }
+      post '/join', { 'name' => 'Bot_Steve' }.to_json, { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' }
+      Server.game.turn_results << TurnResult.new(cards: [Card.new('A', 'Spades')])
     end
 
     it 'only allows authorized requests' do

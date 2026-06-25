@@ -2,7 +2,6 @@ require 'sinatra/contrib/all'
 require 'slim'
 require 'rack/contrib'
 require_relative 'lib/go_fish/game'
-require_relative 'lib/go_fish/player'
 
 class Server < Sinatra::Base
   enable :sessions
@@ -22,8 +21,7 @@ class Server < Sinatra::Base
     api_key = Base64.urlsafe_encode64(name)
     session[:api_key] = api_key
 
-    self.class.api_keys[api_key] = name
-    game = self.class.game
+    api_keys[api_key] = name
     game.add_player(name)
 
     respond_to do |format|
@@ -45,7 +43,8 @@ class Server < Sinatra::Base
       end
 
       format.json do
-        { turn_index: 0, players: [], hand: [], round_results: [] }.to_json
+        bot_name = find_name
+        game.as_json(bot_name).to_json
       end
     end
   end
@@ -57,7 +56,6 @@ class Server < Sinatra::Base
   end
 
   post '/ask' do
-    game = self.class.game
     player = game.players.detect { |player| player.name == find_name }
     turn_result = game.play_turn(player.name, params[:rank], params[:opponent])
     game.advance_turn unless turn_result.go_again
@@ -66,7 +64,7 @@ class Server < Sinatra::Base
   end
 
   get '/winner' do
-    slim :winner, locals: { winner: self.class.game.winner }
+    slim :winner, locals: { winner: game.winner }
   end
 
   def self.reset!
@@ -77,26 +75,26 @@ class Server < Sinatra::Base
   private
 
   def authenticate!
-    return check_keys unless request.accept.any? { _1.entry == "application/json" }
-    halt 401 unless auth.provided? && auth.basic? && self.class.api_keys.key?(auth.username)
+    return check_keys unless bot_request?
+    halt 401 unless auth.provided? && auth.basic? && api_keys.key?(auth.username)
   end
 
   def auth = Rack::Auth::Basic::Request.new(request.env)
 
   def check_keys
-    api_keys = self.class.api_keys
     redirect '/' if api_keys.empty? ||
-                    !api_keys.key?(session[:api_key]) ||
-                    !session.key?(:api_key)
+    !api_keys.key?(session[:api_key]) ||
+    !session.key?(:api_key)
   end
 
-  def enough_players? = self.class.api_keys.length >= 2
-  def find_name = self.class.api_keys[session[:api_key]]
+  def find_name
+    return api_keys[session[:api_key]] unless bot_request?
+    api_keys[auth.username]
+  end
 
   def turn_state
-    game = self.class.game
     game.start unless game.started
-    redirect '/winner' if self.class.game.winner
+    redirect '/winner' if game.winner
 
     player = game.players.detect { |player| player.name == find_name }
     opponents = game.players - [player]
@@ -104,4 +102,9 @@ class Server < Sinatra::Base
 
     [game, player, opponents, is_clients_turn]
   end
+
+  def enough_players? = api_keys.length >= 2
+  def bot_request? = request.accept.any? { _1.entry == "application/json" }
+  def game = self.class.game
+  def api_keys = self.class.api_keys
 end

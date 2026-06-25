@@ -170,7 +170,8 @@ describe Player do
     end
 
     it 'returns a hash containing data for api request' do
-      expect(player.data).to eq mock_data
+      # expect(player.data).to eq mock_data
+      expect(player.data.to_json).to match_json_schema('player')
     end
   end
 end

@@ -239,49 +239,59 @@ describe Game do
     end
   end
 
-  fdescribe '#as_json' do
+  describe '#as_json' do
     let(:player_name) { "John" }
     let(:bot_name) { "Farquad" }
-    let(:turn_result) { TurnResult.new(cards: [Card.new('A', 'Spades')], go_fish: true)}
-    let(:mock_json) do
-      {
-        turn_index: 0,
-        players: [
-          {
-            name: player_name,
-            books: [],
-            book_count: 0
-          },
-          {
-            name: bot_name,
-            books: [],
-            book_count: 0
-          }
-        ],
-        hand: [
-          {
-            rank: 'A',
-            suit: 'Spades'
-          }
-        ],
-        round_results: [
-          {
-            current_player: player_name,
-            rank: 'A',
-            went_fishing: true,
-            display: ''
-          }
-        ]
-      }.to_json
+
+    context 'when turn results is not empty' do
+      let(:turn_result) { TurnResult.new(cards: [Card.new('A', 'Spades')], go_fish: true)}
+      let(:mock_json) do
+        {
+          turn_index: 0,
+          players: [
+            {
+              name: player_name,
+              books: [],
+              book_count: 0
+            },
+            {
+              name: bot_name,
+              books: [],
+              book_count: 0
+            }
+          ],
+          hand: [
+            {
+              rank: 'A',
+              suit: 'Spades'
+            }
+          ],
+          round_results: [
+            {
+              current_player: player_name,
+              rank: 'A',
+              went_fishing: true,
+              display: ''
+            }
+          ]
+        }
+      end
+
+      before do
+        game.players.last.hand << Card.new('A', 'Spades')
+        game.turn_results << turn_result
+      end
+
+      it 'returns json containing data for api request' do
+        expect(game.as_json(bot_name)).to eq mock_json
+      end
     end
 
-    before do
-      game.players.last.hand << Card.new('A', 'Spades')
-      game.turn_results << turn_result
-    end
+    context 'when turn_results is empty' do
 
-    it 'returns json containing data for api request' do
-      expect(game.as_json(bot_name)).to eq mock_json
+      it 'as_json returns an empty array for round_results instead of an object' do
+        expect(game.as_json(bot_name)[:round_results]).to be_empty
+      end
     end
   end
 end
