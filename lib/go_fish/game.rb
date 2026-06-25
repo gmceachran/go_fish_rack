@@ -80,6 +80,20 @@ class Game
     players[name].hand.empty?
   end
 
+  def as_json(bot_name)
+    bot_hand = players.detect { |player| player.name == bot_name }.hand
+    bot_hand_data = bot_hand.map { |card| card.data }
+    active_player_name = players[active_player_index].name
+    turn_result_data = [turn_results.last.data(active_player_name)]
+
+    {
+      turn_index: active_player_index,
+      players: players.map { |player| player.data },
+      hand: bot_hand_data,
+      round_results: turn_result_data
+    }.to_json
+  end
+
   private
 
   def deal(players, num)

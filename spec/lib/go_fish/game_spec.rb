@@ -238,4 +238,50 @@ describe Game do
       end
     end
   end
+
+  fdescribe '#as_json' do
+    let(:player_name) { "John" }
+    let(:bot_name) { "Farquad" }
+    let(:turn_result) { TurnResult.new(cards: [Card.new('A', 'Spades')], go_fish: true)}
+    let(:mock_json) do
+      {
+        turn_index: 0,
+        players: [
+          {
+            name: player_name,
+            books: [],
+            book_count: 0
+          },
+          {
+            name: bot_name,
+            books: [],
+            book_count: 0
+          }
+        ],
+        hand: [
+          {
+            rank: 'A',
+            suit: 'Spades'
+          }
+        ],
+        round_results: [
+          {
+            current_player: player_name,
+            rank: 'A',
+            went_fishing: true,
+            display: ''
+          }
+        ]
+      }.to_json
+    end
+
+    before do
+      game.players.last.hand << Card.new('A', 'Spades')
+      game.turn_results << turn_result
+    end
+
+    it 'returns json containing data for api request' do
+      expect(game.as_json(bot_name)).to eq mock_json
+    end
+  end
 end
