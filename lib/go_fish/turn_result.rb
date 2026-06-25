@@ -5,8 +5,8 @@ class TurnResult
   EMPTY_ANNOUNCEMENT = "Deck is empty! Next player's turn."
   TURN_OVER_ANNOUNCEMENT = 'Turn over.'
 
-  def initialize(go_fish: false, 
-                 cards: [], 
+  def initialize(go_fish: false,
+                 cards: [],
                  book_made: false,
                  go_again: false,
                  deck_empty: false)
@@ -27,6 +27,15 @@ class TurnResult
     return go_again_announcement(player_name, announcement) if go_again
 
     announcement << TURN_OVER_ANNOUNCEMENT
+  end
+
+  def data(name)
+    {
+      current_player: name,
+      rank: cards.first.rank,
+      went_fishing: go_fish,
+      display: ''
+    }
   end
 
   private

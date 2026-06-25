@@ -35,4 +35,11 @@ class Card
 
   def value = RANKS.index(rank)
   def to_s = "#{RANKS_TO_NAMES[rank]} of #{suit}"
+
+  def data
+    {
+      rank: rank,
+      suit: suit
+    }
+  end
 end

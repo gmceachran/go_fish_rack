@@ -34,4 +34,18 @@ describe 'Card' do
       expect(card.to_s).to eq readable_card
     end
   end
+
+  describe '#data' do
+    let(:card) { Card.new('A', 'Spades') }
+    let(:mock_data) do
+      {
+        rank: 'A',
+        suit: 'Spades'
+      }
+    end
+
+    it 'returns a hash containing data for api request' do
+      expect(card.data).to eq mock_data
+    end
+  end
 end

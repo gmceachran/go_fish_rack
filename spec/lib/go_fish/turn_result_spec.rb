@@ -57,4 +57,25 @@ describe TurnResult do
       end
     end
   end
+
+  describe '#data' do
+    let(:player_name) { "John" }
+    let(:turn_result) do
+      described_class.new(cards: [Card.new('A', 'Spades')], go_fish: true)
+    end
+
+    let (:mock_data) do
+      {
+        current_player: player_name,
+        rank: 'A',
+        went_fishing: true,
+        # TODO: Refactor to call for current
+        display: ''
+      }
+    end
+
+    it 'returns a hash containing data for api request' do
+      expect(turn_result.data(player_name)).to eq mock_data
+    end
+  end
 end
