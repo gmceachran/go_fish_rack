@@ -47,6 +47,14 @@ class Player
     hand.any? { |card| card.rank == rank }
   end
 
+  def data
+    {
+      name: name,
+      books: books,
+      book_count: books.length
+    }
+  end
+
   private
 
   def show_books(displayed_hand)

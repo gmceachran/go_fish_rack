@@ -154,4 +154,23 @@ describe Player do
       end
     end
   end
+
+  describe '#data' do
+    let(:book) { Book.new('A') }
+    let (:mock_data) do
+      {
+        name: "John",
+        books: [book],
+        book_count: 1
+      }
+    end
+
+    before do
+      player.books << book
+    end
+
+    it 'returns a hash containing data for api request' do
+      expect(player.data).to eq mock_data
+    end
+  end
 end

@@ -36,7 +36,10 @@ describe Server, type: :request do
       expect(last_response.status).to eq 401
     end
 
-    xit 'returns a response matching game schema' do
+    it 'returns a response matching game schema' do
+      key = JSON.parse(last_response.body)['api_key']
+      encoded = Base64.encode64("#{key}:X").strip
+      get '/game', nil, { "HTTP_ACCEPT" => "application/json", "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Basic #{encoded}" }
       expect(last_response).to match_json_schema('game')
     end
   end
