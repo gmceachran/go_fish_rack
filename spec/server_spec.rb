@@ -55,14 +55,28 @@ RSpec.describe Server do
       end
     end
 
-    it 'active hand increases/decreases per turn' do
-      cards_before_take, cards_after_take = 1, 2
-      set_cards_for_successful_take
-      playing_cards = find_playing_cards
-      expect(playing_cards.length).to be cards_before_take
-      perform_turn
-      playing_cards = find_playing_cards
-      expect(playing_cards.length).to be cards_after_take
+    context 'when a turn is taken' do
+      let(:hand_before_take) { 1 }
+      let(:hand_after_take) { 2 }
+
+      before do
+        Server.game.players.last.hand = [Card.new('A', 'Diamonds')]
+        Server.game.players.first.hand = [Card.new('A', 'Spades')]
+        Server.game.active_player_index = 1
+        visit '/game'
+      end
+
+      it 'active hand increases/decreases per turn' do
+        playing_cards = find_playing_cards
+        expect(playing_cards.length).to be hand_before_take
+        perform_turn
+        playing_cards = find_playing_cards
+        expect(playing_cards.length).to be hand_after_take
+      end
+
+      xit 'the action is logged' do
+        expect(page).to have_content "John asked Jane for any A's"
+      end
     end
 
     context 'when there is a winner' do
@@ -82,13 +96,6 @@ RSpec.describe Server do
     visit '/'
     fill_in :name, with: name
     click_on 'Join'
-  end
-
-  def set_cards_for_successful_take
-    Server.game.players.last.hand = [Card.new('A', 'Diamonds')]
-    Server.game.players.first.hand = [Card.new('A', 'Spades')]
-    Server.game.active_player_index = 1
-    visit '/game'
   end
 
   def find_playing_cards

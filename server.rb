@@ -1,10 +1,14 @@
-require 'sinatra'
+require 'sinatra/contrib/all'
 require 'slim'
+require 'rack/contrib'
 require_relative 'lib/go_fish/game'
 require_relative 'lib/go_fish/player'
 
 class Server < Sinatra::Base
   enable :sessions
+
+  register Sinatra::RespondWith
+  use Rack::JSONBodyParser
 
   def self.game = @@game ||= Game.new
   def self.api_keys = @@api_keys ||= {}
@@ -14,23 +18,36 @@ class Server < Sinatra::Base
   end
 
   post '/join' do
-    api_key = Base64.urlsafe_encode64(params["name"])
+    name = params[:name]
+    api_key = Base64.urlsafe_encode64(name)
     session[:api_key] = api_key
-    self.class.api_keys[api_key] = params[:name]
 
+    self.class.api_keys[api_key] = name
     game = self.class.game
-    player_name = find_name
-    game.add_player(player_name)
+    game.add_player(name)
 
-    redirect '/game'
+    respond_to do |format|
+      format.html { redirect '/game' }
+      format.json do
+        { 'api_key' => api_key }.to_json
+      end
+    end
   end
 
   get '/game' do
-    check_keys
-    redirect '/waiting' unless enough_players?
-    game, player, opponents, is_clients_turn = turn_state
+    authenticate!
 
-    slim :game, locals: { game: game, player: player, opponents: opponents, is_clients_turn: is_clients_turn }
+    respond_to do |format|
+      format.html do
+        redirect '/waiting' unless enough_players?
+        game, player, opponents, is_clients_turn = turn_state
+        slim :game, locals: { game: game, player: player, opponents: opponents, is_clients_turn: is_clients_turn }
+      end
+
+      format.json do
+        { turn_index: 0, players: [], hand: [], round_results: [] }.to_json
+      end
+    end
   end
 
   get '/waiting' do
@@ -57,15 +74,20 @@ class Server < Sinatra::Base
     @@api_keys = nil
   end
 
-
   private
+
+  def authenticate!
+    return check_keys unless request.accept.any? { _1.entry == "application/json" }
+    halt 401 unless auth.provided? && auth.basic? && self.class.api_keys.key?(auth.username)
+  end
+
+  def auth = Rack::Auth::Basic::Request.new(request.env)
 
   def check_keys
     api_keys = self.class.api_keys
-    redirect '/' if api_keys.empty?
-    redirect '/' unless session.key?(:api_key)
-    api_keys.each { |api_key, name| return if session[:api_key] == api_key }
-    redirect '/'
+    redirect '/' if api_keys.empty? ||
+                    !api_keys.key?(session[:api_key]) ||
+                    !session.key?(:api_key)
   end
 
   def enough_players? = self.class.api_keys.length >= 2

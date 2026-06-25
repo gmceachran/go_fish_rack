@@ -7,10 +7,12 @@ gem 'rerun'
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'slim'
+gem 'httparty'
 
 group :test do
   gem 'capybara'
   gem 'capybara-playwright-driver'
   gem 'rack-test'
   gem 'rspec'
+  gem 'json_matchers'
 end

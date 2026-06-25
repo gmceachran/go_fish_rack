@@ -1,9 +1,10 @@
- 
+
 class Card
   attr_reader :rank, :suit
   class InvalidRank < StandardError; end
   class InvalidSuit < StandardError; end
   RANKS = %w[ 2 3 4 5 6 7 8 9 10 J Q K A ]
+  # RANKS = %w[ 2 3 4 5 ]
   SUITS = %w[ Spades Clubs Hearts Diamonds ]
   RANKS_TO_NAMES = {
     '2'  => 'Two',
