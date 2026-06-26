@@ -1,8 +1,8 @@
-require_relative '../server'
+require_relative '../controller'
 
-RSpec.describe Server do
+RSpec.describe Controller do
   after do
-    Server.reset!
+    Controller.reset!
   end
 
   it 'is possible to join a game' do
@@ -60,9 +60,9 @@ RSpec.describe Server do
       let(:hand_after_take) { 2 }
 
       before do
-        Server.game.players.last.hand = [Card.new('A', 'Diamonds')]
-        Server.game.players.first.hand = [Card.new('A', 'Spades')]
-        Server.game.active_player_index = 1
+        Controller.game.players.last.hand = [Card.new('A', 'Diamonds')]
+        Controller.game.players.first.hand = [Card.new('A', 'Spades')]
+        Controller.game.active_player_index = 1
         visit '/game'
       end
 
@@ -81,8 +81,8 @@ RSpec.describe Server do
 
     context 'when there is a winner' do
       before do
-        Server.game.players.each { |player| player.hand = [] }
-        Server.game.players.first.books << Book.new('3')
+        Controller.game.players.each { |player| player.hand = [] }
+        Controller.game.players.first.books << Book.new('3')
       end
 
       context 'when the request is from a browser' do

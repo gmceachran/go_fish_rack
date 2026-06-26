@@ -3,7 +3,7 @@ require 'slim'
 require 'rack/contrib'
 require_relative 'lib/go_fish/game'
 
-class Server < Sinatra::Base
+class Controller < Sinatra::Base
   enable :sessions
 
   register Sinatra::RespondWith

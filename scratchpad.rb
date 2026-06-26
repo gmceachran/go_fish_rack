@@ -1,2 +1,5 @@
-# can't run the bot yet.
-# How am I supposed to figure out what data it sends, if I can't run it and catch the data with a binding in /join
+# where should the actual lobby logic sit?
+# what is the responsibility of the lobby?
+# It's essentially a controller for games and players.
+# it instantiates games and delegates players to approparite games,
+# it also has validation to make sure players can't join full games etc.

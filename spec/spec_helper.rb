@@ -4,7 +4,7 @@ require 'capybara/dsl'
 require 'capybara-playwright-driver'
 require 'json_matchers/rspec'
 ENV['RACK_ENV'] = 'test'
-require_relative '../server'
+require_relative '../controller'
 
 Capybara.register_driver :playwright do |app|
   Capybara::Playwright::Driver.new(app, browser_type: :chromium, headless: false)
@@ -23,8 +23,8 @@ RSpec.configure do |config|
 
     # ^ Capybara
     config.include Capybara::DSL
-    config.before { Capybara.app = Server.new }
-    config.after { Server.reset! }
+    config.before { Capybara.app = Controller.new }
+    config.after { Controller.reset! }
 
     # ^ Playwright
     config.before(:each, :js) do

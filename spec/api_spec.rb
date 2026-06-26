@@ -1,10 +1,10 @@
-require_relative '../server'
+require_relative '../controller'
 
-describe Server, type: :request do
+describe Controller, type: :request do
   include Rack::Test::Methods
 
   def app
-    Server.new
+    Controller.new
   end
 
   describe 'POST /join' do
@@ -20,7 +20,7 @@ describe Server, type: :request do
   describe 'GET /game' do
     before do
       post '/join', { 'name' => 'Bot_Steve' }.to_json, { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' }
-      Server.game.turn_results << TurnResult.new(cards: [Card.new('A', 'Spades')])
+      Controller.game.turn_results << TurnResult.new(cards: [Card.new('A', 'Spades')])
     end
 
     it 'only allows authorized requests' do
@@ -54,7 +54,7 @@ describe Server, type: :request do
       post '/join', { 'name' => bot_name }.to_json, { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' }
       key = JSON.parse(last_response.body)['api_key']
       join_game(player_name)
-      Server.game.players.first.hand = [Card.new('Q', 'Spades')]
+      Controller.game.players.first.hand = [Card.new('Q', 'Spades')]
       encoded = Base64.encode64("#{key}:X").strip
       post '/game', { 'rank' => rank, 'player' => player_name }.to_json, { "HTTP_ACCEPT" => "application/json", "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Basic #{encoded}" }
     end
