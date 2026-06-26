@@ -44,4 +44,36 @@ describe Server, type: :request do
       expect(last_response).to match_json_schema('game')
     end
   end
+
+  describe 'POST /game' do
+    let(:player_name) { 'John' }
+    let(:bot_name) { 'Bot_Steve' }
+    let(:rank) { 'Q' }
+
+    before do
+      post '/join', { 'name' => bot_name }.to_json, { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' }
+      key = JSON.parse(last_response.body)['api_key']
+      join_game(player_name)
+      Server.game.players.first.hand = [Card.new('Q', 'Spades')]
+      encoded = Base64.encode64("#{key}:X").strip
+      post '/game', { 'rank' => rank, 'player' => player_name }.to_json, { "HTTP_ACCEPT" => "application/json", "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Basic #{encoded}" }
+    end
+
+    it "plays turn with bot's choice" do
+      body = JSON.parse(last_response.body)
+      expect(body['turn_index']).to eq 1
+    end
+  end
+
+  def join_game(name)
+    visit '/'
+    fill_in :name, with: name
+    click_on 'Join'
+  end
+
+  def perform_turn(opponent_name)
+    find('option', text: opponent_name, match: :first).select_option
+    select 'A', from: 'rank'
+    click_on 'Ask for Cards'
+  end
 end

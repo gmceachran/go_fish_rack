@@ -49,6 +49,14 @@ class Server < Sinatra::Base
     end
   end
 
+  post '/game' do
+    authenticate!
+    player = game.players.detect { |player| player.name == find_name }
+    turn_result = game.play_turn(player.name, params[:rank], params[:player])
+    game.advance_turn unless turn_result.go_again
+    game.as_json(find_name).to_json
+  end
+
   get '/waiting' do
     redirect '/game' if enough_players?
 
