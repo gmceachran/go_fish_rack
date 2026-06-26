@@ -43,6 +43,7 @@ class Server < Sinatra::Base
       end
 
       format.json do
+        turn_state if enough_players?
         bot_name = find_name
         game.as_json(bot_name).to_json
       end
@@ -87,8 +88,6 @@ class Server < Sinatra::Base
     halt 401 unless auth.provided? && auth.basic? && api_keys.key?(auth.username)
   end
 
-  def auth = Rack::Auth::Basic::Request.new(request.env)
-
   def check_keys
     redirect '/' if api_keys.empty? ||
     !api_keys.key?(session[:api_key]) ||
@@ -102,7 +101,7 @@ class Server < Sinatra::Base
 
   def turn_state
     game.start unless game.started
-    redirect '/winner' if game.winner
+    redirect '/winner' if game.winner && !bot_request?
 
     player = game.players.detect { |player| player.name == find_name }
     opponents = game.players - [player]
@@ -111,6 +110,7 @@ class Server < Sinatra::Base
     [game, player, opponents, is_clients_turn]
   end
 
+  def auth = Rack::Auth::Basic::Request.new(request.env)
   def enough_players? = api_keys.length >= 2
   def bot_request? = request.accept.any? { _1.entry == "application/json" }
   def game = self.class.game

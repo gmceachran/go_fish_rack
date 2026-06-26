@@ -36,6 +36,32 @@ describe Game do
       players.last.hand = [requested_card, opponent_card]
     end
 
+    context "when a player's hand is empty" do
+      let(:player_name) { 'John' }
+      let(:opponent_name) { 'Farquad' }
+      let(:rank) { '3' }
+
+      before { game.players.last.hand = [] }
+
+      context 'when the deck is not empty' do
+        it 'draws them a card from the deck' do
+          expect(game.players.last.hand).to be_empty
+          game.play_turn(player_name, rank, opponent_name)
+          expect(game.players.last.hand.length).to be 1
+        end
+      end
+
+      context 'when the deck is empty' do
+        before { game.deck.cards = [] }
+
+        it 'does nothing' do
+          expect(game.players.last.hand).to be_empty
+          game.play_turn(player_name, rank, opponent_name)
+          expect(game.players.last.hand).to be_empty
+        end
+      end
+    end
+
     it 'returns a TurnResult object' do
       expect(turn_result).to be_a TurnResult
     end

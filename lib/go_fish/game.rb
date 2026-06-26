@@ -33,6 +33,8 @@ class Game
     opponent_cards_of_rank = opponent.cards_of_rank_given(rank)
 
     handle_take_cards(player, opponent_cards_of_rank, rank)
+    handle_empty_hand
+
     turn_result
   end
 
@@ -49,6 +51,7 @@ class Game
   end
 
   def winner
+    return nil unless players.length > 1
     return nil unless players.all? { |player| player.hand.empty? }
 
     winner = players.max_by do |player|
@@ -81,12 +84,14 @@ class Game
   end
 
   def as_json(bot_name)
-    {
+    data = {
       turn_index: active_player_index,
       players: players.map { |player| player.data },
       hand: bot_hand_data(bot_name),
       round_results: turn_result_data
     }
+    data[:winners] = [winner] if winner
+    data
   end
 
   private
@@ -105,6 +110,12 @@ class Game
       take_from_opponent(player, opponent_cards)
     else
       take_from_deck(player, rank)
+    end
+  end
+
+  def handle_empty_hand
+    players.each do |player|
+      player.take([deck.top_card]) if player.hand_empty? && !deck.empty?
     end
   end
 

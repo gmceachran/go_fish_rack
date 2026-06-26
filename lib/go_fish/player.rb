@@ -11,6 +11,7 @@ class Player
   end
 
   def hand_size = hand.length
+  def hand_empty? = hand.empty?
 
   def take(new_cards)
     new_cards.each { |card| hand << card }

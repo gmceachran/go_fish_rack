@@ -14,6 +14,22 @@ describe Player do
     end
   end
 
+  describe '#hand_emtpy?' do
+    context 'when hand is not empty' do
+      before { player.hand << Card.new('A', 'Spades') }
+
+      it 'returns false' do
+        expect(player.hand_empty?).to be false
+      end
+    end
+
+    context 'when hand is empty' do
+      it 'returns true' do
+        expect(player.hand_empty?).to be true
+      end
+    end
+  end
+
   describe '#take' do
     let(:player_hand) { player.hand }
     let(:card1) { Card.new('3', 'Clubs') }

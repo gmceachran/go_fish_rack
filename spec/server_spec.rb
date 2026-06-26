@@ -85,9 +85,11 @@ RSpec.describe Server do
         Server.game.players.first.books << Book.new('3')
       end
 
-      it 'players are redirected to a winner announcement' do
-        visit '/game'
-        expect(page).to have_content 'Jane wins!'
+      context 'when the request is from a browser' do
+        it 'players are redirected to a winner announcement' do
+          visit '/game'
+          expect(page).to have_content 'Jane wins!'
+        end
       end
     end
   end
