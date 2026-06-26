@@ -3,27 +3,32 @@ require_relative 'turn_result'
 require_relative 'deck'
 
 class Game
-  attr_reader :players, :deck, :turn_results
+  attr_reader :players, :deck, :turn_results, :allowed_player_count
   attr_accessor :started, :active_player_index
-  STARTING_HAND = 7
+  STARTING_HAND = {
+    two_or_three: 7,
+    more_than_three: 5
+  }
 
-  def initialize
+  def initialize(num)
     @players = []
     @deck = Deck.new
     @turn_results = []
     @started = false
     @active_player_index = 0
+    @allowed_player_count = num
   end
 
   def add_player(player_name)
     players << Player.new(player_name)
   end
 
+  def number_of_players = players.length
   def turn_result = turn_results.last
 
   def start
     deck.shuffle
-    deal(players, STARTING_HAND)
+    deal(players, STARTING_HAND[hand_size])
     self.started = true
   end
 
@@ -39,7 +44,7 @@ class Game
   end
 
   def advance_turn
-    if active_player_index == (players.length - 1)
+    if active_player_index == (number_of_players - 1)
       self.active_player_index = 0
     else
       self.active_player_index += 1
@@ -51,7 +56,7 @@ class Game
   end
 
   def winner
-    return nil unless players.length > 1
+    return nil unless number_of_players > 1
     return nil unless players.all? { |player| player.hand.empty? }
 
     winner = players.max_by do |player|
@@ -95,6 +100,8 @@ class Game
   end
 
   private
+
+  def hand_size = allowed_player_count <= 3 ? :two_or_three : :more_than_three
 
   def deal(players, num)
       players.each do |player|

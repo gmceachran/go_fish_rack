@@ -13,6 +13,7 @@ class Controller < Sinatra::Base
   def self.api_keys = @@api_keys ||= {}
 
   get '/' do
+    # slim :lobby
     slim :login
   end
 
